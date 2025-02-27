@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка товаров</title>
+</head>
+<body>
+    <h1>Управление товарами</h1>
+
+    <h2>Добавить товар</h2>
+    <form id="addProductForm">
+        <input type="text" name="name" placeholder="Название товара" required>
+        <input type="number" name="price" placeholder="Цена товара" required>
+        <textarea name="description" placeholder="Описание товара" required></textarea>
+        <input type="text" name="categories" placeholder="Категории (через запятую)" required>
+        <button type="submit">Добавить товар</button>
+    </form>
+
+    <h2>Редактировать товар</h2>
+    <form id="editProductForm">
+        <input type="number" name="id" placeholder="ID товара" required>
+        <input type="text" name="name" placeholder="Новое название товара" required>
+        <input type="number" name="price" placeholder="Новая цена товара" required>
+        <textarea name="description" placeholder="Новое описание товара" required></textarea>
+        <input type="text" name="categories" placeholder="Новые категории (через запятую)" required>
+        <button type="submit">Редактировать товар</button>
+    </form>
+
+    <h2>Удалить товар</h2>
+    <form id="deleteProductForm">
+        <input type="number" name="id" placeholder="ID товара" required>
+        <button type="submit">Удалить товар</button>
+    </form>
+
+    <script>
+        document.getElementById('addProductForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const response = await fetch('/add-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            alert(await response.text());
+        };
+
+        document.getElementById('editProductForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const response = await fetch('/edit-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            alert(await response.text());
+        };
+
+        document.getElementById('deleteProductForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const response = await fetch('/delete-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            alert(await response.text());
+        };
+    </script>
+</body>
+</html>

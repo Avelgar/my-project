@@ -7,7 +7,6 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/products', (req, res) => {
@@ -15,7 +14,17 @@ app.get('/products', (req, res) => {
         if (err) {
             return res.status(500).send('Ошибка чтения файла');
         }
-        res.json(JSON.parse(data));
+        
+        const products = JSON.parse(data);
+        const category = req.query.category;
+        if (category) {
+            const filteredProducts = products.filter(product => 
+                product.categories.includes(category)
+            );
+            return res.json(filteredProducts);
+        }
+
+        res.json(products);
     });
 });
 
