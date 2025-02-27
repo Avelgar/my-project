@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин</title>
+</head>
+<body>
+    <h1>Каталог товаров</h1>
+    <div id="products"></div>
+
+    <script>
+        fetch('http://localhost:3000/products')
+            .then(response => response.json())
+            .then(data => {
+                const productsDiv = document.getElementById('products');
+                data.forEach(product => {
+                    productsDiv.innerHTML += `
+                        <div>
+                            <h2>${product.name}</h2>
+                            <p>Цена: ${product.price} руб.</p>
+                            <p>${product.description}</p>
+                        </div>
+                    `;
+                });
+            });
+    </script>
+</body>
+</html>
