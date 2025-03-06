@@ -10,65 +10,143 @@
 
     <h2>Добавить товар</h2>
     <form id="addProductForm">
-        <input type="text" name="name" placeholder="Название товара" required>
-        <input type="number" name="price" placeholder="Цена товара" required>
-        <textarea name="description" placeholder="Описание товара" required></textarea>
-        <input type="text" name="categories" placeholder="Категории (через запятую)" required>
-        <button type="submit">Добавить товар</button>
+        <div id="productFields">
+            <div class="product">
+                <input type="text" class="productName" placeholder="Название товара" required>
+                <input type="number" class="productPrice" placeholder="Цена товара" required>
+                <textarea class="productDescription" placeholder="Описание товара" required></textarea>
+                <input type="text" class="categories" placeholder="Введите категории через запятую">                          
+                <button type="button" class="removeProduct">Удалить</button>
+            </div>
+        </div>
+        <button type="button" id="addMoreProducts">Добавить еще товар</button>
+        <button type="submit">Добавить товары</button>
     </form>
 
     <h2>Редактировать товар</h2>
     <form id="editProductForm">
-        <input type="number" name="id" placeholder="ID товара" required>
-        <input type="text" name="name" placeholder="Новое название товара" required>
-        <input type="number" name="price" placeholder="Новая цена товара" required>
-        <textarea name="description" placeholder="Новое описание товара" required></textarea>
-        <input type="text" name="categories" placeholder="Новые категории (через запятую)" required>
+        <input type="number" id="id" placeholder="ID товара" required>
+        <input type="text" id="name2" placeholder="Новое название товара" required>
+        <input type="number" id="price2" placeholder="Новая цена товара" required>
+        <textarea id="description2" placeholder="Новое описание товара" required></textarea>
+        <input type="text" id="categories2" placeholder="Новые категории (через запятую)" required>
         <button type="submit">Редактировать товар</button>
     </form>
 
     <h2>Удалить товар</h2>
     <form id="deleteProductForm">
-        <input type="number" name="id" placeholder="ID товара" required>
+        <input type="number" id="id2" placeholder="ID товара" required>
         <button type="submit">Удалить товар</button>
     </form>
 
     <script>
-        document.getElementById('addProductForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            const response = await fetch('/add-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            alert(await response.text());
-        };
+         document.getElementById('addProductForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-        document.getElementById('editProductForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            const response = await fetch('/edit-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            alert(await response.text());
-        };
+            const products = [];
+            const productElements = document.querySelectorAll('.product');
 
-        document.getElementById('deleteProductForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            const response = await fetch('/delete-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            productElements.forEach(product => {
+                const name = product.querySelector('.productName').value;
+                const price = parseFloat(product.querySelector('.productPrice').value);
+                const description = product.querySelector('.productDescription').value;
+                const categoriesInput = product.querySelector('.categories').value;
+
+                const categories = categoriesInput.split(',').map(category => category.trim());
+
+                const newProduct = {
+                    name: name,
+                    price: price,
+                    description: description,
+                    categories: categories 
+                };
+
+                products.push(newProduct);
             });
-            alert(await response.text());
-        };
+
+            fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(products),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Успех:', data);
+                alert('Товары добавлены успешно!');
+                document.getElementById('addProductForm').reset();
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при добавлении товаров.');
+            });
+        });
+
+        document.getElementById('addMoreProducts').addEventListener('click', function() {
+            const newProduct = document.createElement('div');
+            newProduct.classList.add('product');
+            newProduct.innerHTML = `
+                <input type="text" class="productName" placeholder="Название товара" required>
+                <input type="number" class="productPrice" placeholder="Цена товара" required>
+                <textarea class="productDescription" placeholder="Описание товара" required></textarea>
+                <input type="text" class="categories" placeholder="Категории (через запятую)" required>
+                <button type="button" class="removeProduct">Удалить</button>
+            `;
+            document.getElementById('productFields').appendChild(newProduct);
+        });
+
+        document.getElementById('productFields').addEventListener('click', function(event) {
+            if (event.target.classList.contains('removeProduct')) {
+                event.target.parentElement.remove();
+            }
+        });
+
+        document.getElementById('editProductForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('id').value;
+            const name = document.getElementById('name2').value;
+            const price = parseFloat(document.getElementById('price2').value);
+            const description = document.getElementById('description2').value;
+            const categories = document.getElementById('categories2').value;
+
+            fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, price, description, categories }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Успех:', data);
+                alert('Товар отредактирован успешно!');
+                document.getElementById('editProductForm').reset();
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при редактировании товара.');
+            });
+        });
+
+        document.getElementById('deleteProductForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('id2').value;
+
+            fetch(`/api/products/${id}`, {
+            method: 'DELETE',
+            })
+            .then(() => {
+                alert('Товар удален успешно!');
+                document.getElementById('deleteProductForm').reset();
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при удалении товара.');
+            });
+        });
     </script>
 </body>
 </html>
